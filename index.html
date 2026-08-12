@@ -208,6 +208,7 @@ summary{color:var(--blue);}
               <option value="R1">Ring 1 – &lt; 50 km</option>
               <option value="R2" selected>Ring 2 – s.d. 100 km</option>
               <option value="R3">Ring 3 – s.d. 300 km</option>
+              <option value="R4">Di atas Ring 3 – &gt; 300 km</option>
             </select>
           </div>
           <div class="field">
@@ -270,7 +271,7 @@ summary{color:var(--blue);}
         </div>
 
         <div class="note">
-          <b>Ring 2</b> memakai tarif Rp/Ton.Km hasil perhitungan pada <b>100 km</b>, sedangkan <b>Ring 3</b> pada <b>300 km</b>; tarif tersebut kemudian dikalikan dengan jarak aktual. Untuk <b>Ring 1</b>, pengguna dapat memilih basis <b>50 km</b> atau menghitung langsung sesuai jarak aktual. <b>Load Factor</b> dan <b>Profit/Margin</b> dapat diubah manual dengan default Excel masing-masing 50% dan 10%. Harga BBM otomatis mengikuti <b>Rekap Interview Driver kolom J</b>. Jika memakai <b>penyeberangan</b>, biaya penyeberangan juga dapat diinput manual.
+          <b>Ring 2</b> memakai tarif Rp/Ton.Km hasil perhitungan pada <b>100 km</b>, sedangkan <b>Ring 3</b> pada <b>300 km</b>; tarif tersebut kemudian dikalikan dengan jarak aktual. Untuk jarak <b>di atas Ring 3 (&gt;300 km)</b>, tarif Rp/Ton.Km tetap memakai <b>basis 300 km</b> kemudian dikalikan jarak aktual. Untuk <b>Ring 1</b>, pengguna dapat memilih basis <b>50 km</b> atau menghitung langsung sesuai jarak aktual. <b>Load Factor</b> dan <b>Profit/Margin</b> dapat diubah manual dengan default Excel masing-masing 50% dan 10%. Harga BBM otomatis mengikuti <b>Rekap Interview Driver kolom J</b>. Jika memakai <b>penyeberangan</b>, biaya penyeberangan juga dapat diinput manual.
         </div>
       </div>
     </section>
@@ -324,7 +325,7 @@ summary{color:var(--blue);}
 </main>
 
 <div class="footer">
-  Basis perhitungan: <b>Rev08-FINAL-Kalkulator Tarif Trucking Biomassa ALL PLTU R1.xlsx</b>. Metode ring: R1 basis 50 km/aktual, R2 basis 100 km, R3 basis 300 km. Load Factor, Profit/Margin, Harga BBM, dan Biaya Penyeberangan dapat disimulasikan sebagai input. Kalkulasi dilakukan lokal pada perangkat pengguna; angka tampilan dibulatkan, sedangkan mesin perhitungan menggunakan presisi penuh dari formula Excel.
+  Basis perhitungan: <b>Rev08-FINAL-Kalkulator Tarif Trucking Biomassa ALL PLTU R1.xlsx</b>. Metode ring: R1 basis 50 km/aktual, R2 basis 100 km, R3 basis 300 km, dan jarak di atas Ring 3 tetap menggunakan basis tarif 300 km. Load Factor, Profit/Margin, Harga BBM, dan Biaya Penyeberangan dapat disimulasikan sebagai input. Kalkulasi dilakukan lokal pada perangkat pengguna; angka tampilan dibulatkan, sedangkan mesin perhitungan menggunakan presisi penuh dari formula Excel.
 </div>
 
 <script>
@@ -479,9 +480,12 @@ function ringState(){
   }else if(ring==="R2"){
     basis=100;
     methodLabel="basis 100 km × jarak aktual";
-  }else{
+  }else if(ring==="R3"){
     basis=300;
     methodLabel="basis 300 km × jarak aktual";
+  }else{
+    basis=300;
+    methodLabel="di atas Ring 3: tarif basis 300 km × jarak aktual";
   }
   return {ring,actual,basis,methodLabel};
 }
@@ -506,6 +510,7 @@ function recalc(){
   if(rs.ring==="R1" && Number.isFinite(actualDistance) && actualDistance>=50) errors.push("Ring 1 hanya untuk jarak aktual di bawah 50 km.");
   if(rs.ring==="R2" && Number.isFinite(actualDistance) && (actualDistance<50 || actualDistance>100)) errors.push("Ring 2 digunakan untuk jarak aktual 50–100 km.");
   if(rs.ring==="R3" && Number.isFinite(actualDistance) && (actualDistance<=100 || actualDistance>300)) errors.push("Ring 3 digunakan untuk jarak aktual di atas 100 km sampai 300 km.");
+  if(rs.ring==="R4" && Number.isFinite(actualDistance) && actualDistance<=300) errors.push("Pilihan Di atas Ring 3 digunakan untuk jarak aktual lebih dari 300 km.");
   if(!Number.isFinite(capacity) || capacity<5 || capacity>30) errors.push("Kapasitas truk harus berada pada rentang 5–30 ton.");
   if(!Number.isFinite(loadFactorPct) || loadFactorPct<=0 || loadFactorPct>100) errors.push("Load Factor harus lebih besar dari 0% dan maksimal 100%.");
   if(!Number.isFinite(profitPct) || profitPct<0 || profitPct>100) errors.push("Profit/Margin harus berada pada rentang 0–100%.");
@@ -553,7 +558,7 @@ function recalc(){
   document.getElementById("freq").textContent=fmt2.format(get("Asumsi","K9"))+" rit";
   document.getElementById("tonKmYear").textContent=fmt0.format(get("Asumsi","K15"))+" ton-km";
   document.getElementById("crossingCost").textContent=rup(get("Asumsi","C69"),0);
-  const ringName=rs.ring==="R1"?"Ring 1":rs.ring==="R2"?"Ring 2":"Ring 3";
+  const ringName=rs.ring==="R1"?"Ring 1":rs.ring==="R2"?"Ring 2":rs.ring==="R3"?"Ring 3":"Di atas Ring 3";
   document.getElementById("resultContext").textContent=`${pltu} • ${ringName} • aktual ${fmt2.format(actualDistance)} km • basis BOK ${fmt2.format(basisDistance)} km • ${fmt2.format(capacity)} ton • LF ${fmt2.format(loadFactorPct)}% • profit ${fmt2.format(profitPct)}% • BBM ${rup(fuelPrice,0)}/liter${crossing==="YA" ? ` • penyeberangan ${rup(crossingCost,0)}/rit` : ""}`;
 
   const box=document.getElementById("detailRows");
@@ -578,7 +583,8 @@ function syncRingUI(setDefault=false){
   if(setDefault){
     if(ring==="R1") d.value=40;
     else if(ring==="R2") d.value=90;
-    else d.value=200;
+    else if(ring==="R3") d.value=200;
+    else d.value=350;
   }
   recalc();
 }
@@ -639,7 +645,7 @@ function syncFuelFromPltu(){
   document.getElementById("copyBtn").addEventListener("click",async()=>{
     recalc();
     const rs=ringState();
-    const ringName=rs.ring==="R1"?"Ring 1":rs.ring==="R2"?"Ring 2":"Ring 3";
+    const ringName=rs.ring==="R1"?"Ring 1":rs.ring==="R2"?"Ring 2":rs.ring==="R3"?"Ring 3":"Di atas Ring 3";
     const text=`Kalkulator Biaya Angkutan Biomassa\nPLTU: ${sel.value}\nRing: ${ringName}\nJarak aktual: ${document.getElementById("actualDistance").value} km\nJarak basis BOK: ${rs.basis} km\nMetode: ${rs.methodLabel}\nKapasitas: ${document.getElementById("capacity").value} ton\nLoad Factor: ${document.getElementById("loadFactorInput").value}%\nProfit/Margin: ${document.getElementById("profitInput").value}%\nHarga BBM: Rp ${fmt0.format(Number(document.getElementById("fuelPriceInput").value))}/liter\nPenyeberangan: ${crossing}${crossing==="YA" ? `\nBiaya penyeberangan: Rp ${fmt0.format(Number(document.getElementById("crossingCostInput").value))}/rit` : ""}\nBiaya/Ton.Km (basis ring): ${document.getElementById("perTonKm").textContent}\nBiaya/Ton: ${document.getElementById("perTon").textContent}\n*sebelum pajak`;
     try{ await navigator.clipboard.writeText(text); this && null; document.getElementById("copyBtn").textContent="Tersalin"; setTimeout(()=>document.getElementById("copyBtn").textContent="Salin hasil",1200); }
     catch(e){ alert(text); }
