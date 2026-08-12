@@ -26,6 +26,8 @@ body{margin:0}
 .card .hd p{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.45}
 .card .bd{padding:20px}
 .field{margin-bottom:16px}
+.hidden{display:none!important}
+.method-hint{margin-top:7px;color:var(--muted);font-size:11px;line-height:1.4}
 label{display:block;font-size:12px;font-weight:800;letter-spacing:.035em;text-transform:uppercase;color:#486581;margin-bottom:7px}
 select,input{width:100%;border:1px solid #bcccdc;background:#fff;color:var(--ink);border-radius:11px;padding:12px 13px;font-size:15px;outline:none;transition:.15s}
 select:focus,input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,166,214,.12)}
@@ -108,13 +110,31 @@ summary{cursor:pointer;color:var(--blue);font-weight:800;font-size:13px}
 
         <div class="inline">
           <div class="field">
-            <label for="distance">Jarak satu arah</label>
-            <div class="unit"><input id="distance" type="number" min="0.1" step="0.1" value="100"><span>km</span></div>
+            <label for="ring">Ring jarak</label>
+            <select id="ring">
+              <option value="R1">Ring 1 – &lt; 50 km</option>
+              <option value="R2" selected>Ring 2 – s.d. 100 km</option>
+              <option value="R3">Ring 3 – s.d. 300 km</option>
+            </select>
           </div>
           <div class="field">
-            <label for="capacity">Kapasitas truk</label>
-            <div class="unit"><input id="capacity" type="number" min="5" max="30" step="0.1" value="17"><span>ton</span></div>
+            <label for="actualDistance">Jarak aktual</label>
+            <div class="unit"><input id="actualDistance" type="number" min="0.1" step="0.1" value="90"><span>km</span></div>
           </div>
+        </div>
+
+        <div class="field hidden" id="ring1MethodField">
+          <label>Metode perhitungan Ring 1</label>
+          <div class="segment">
+            <button type="button" id="ring1Anchor" class="active" data-value="ANCHOR">Acuan 50 km</button>
+            <button type="button" id="ring1Direct" data-value="DIRECT">Hitung aktual</button>
+          </div>
+          <div class="method-hint" id="ringMethodNote">Acuan 50 km: tarif Rp/Ton.Km dihitung pada 50 km, kemudian dikalikan jarak aktual.</div>
+        </div>
+
+        <div class="field">
+          <label for="capacity">Kapasitas truk</label>
+          <div class="unit"><input id="capacity" type="number" min="5" max="30" step="0.1" value="17"><span>ton</span></div>
         </div>
 
         <div class="field">
@@ -138,7 +158,7 @@ summary{cursor:pointer;color:var(--blue);font-weight:800;font-size:13px}
         </div>
 
         <div class="note">
-          Rentang kapasitas pada workbook adalah <b>5–30 ton</b>. Kecepatan dan konsumsi BBM mengikuti parameter PLTU. <b>Harga BBM</b> otomatis terisi dari sheet <b>Rekap Interview Driver kolom J</b>, namun dapat diubah manual sebagai skenario.
+          <b>Ring 2</b> memakai tarif Rp/Ton.Km hasil perhitungan pada <b>100 km</b>, sedangkan <b>Ring 3</b> pada <b>300 km</b>; tarif tersebut kemudian dikalikan dengan jarak aktual. Untuk <b>Ring 1</b>, pengguna dapat memilih basis <b>50 km</b> atau menghitung langsung sesuai jarak aktual. Harga BBM otomatis mengikuti <b>Rekap Interview Driver kolom J</b> dan tetap dapat diubah manual.
         </div>
       </div>
     </section>
@@ -181,7 +201,7 @@ summary{cursor:pointer;color:var(--blue);font-weight:800;font-size:13px}
 
         <div class="section-title">Parameter turunan</div>
         <div class="model-meta">
-          <div class="meta"><span>Jarak pulang-pergi</span><b id="roundTrip">—</b></div>
+          <div class="meta"><span>Jarak basis pulang-pergi</span><b id="roundTrip">—</b></div>
           <div class="meta"><span>Frekuensi rit/hari</span><b id="freq">—</b></div>
           <div class="meta"><span>Produksi ton-km/tahun</span><b id="tonKmYear">—</b></div>
           <div class="meta"><span>Biaya penyeberangan/rit</span><b id="crossingCost">—</b></div>
@@ -192,7 +212,7 @@ summary{cursor:pointer;color:var(--blue);font-weight:800;font-size:13px}
 </main>
 
 <div class="footer">
-  Basis perhitungan: <b>Rev08-FINAL-Kalkulator Tarif Trucking Biomassa ALL PLTU R1.xlsx</b>. Kalkulasi dilakukan lokal pada perangkat pengguna; angka tampilan dibulatkan, sedangkan mesin perhitungan menggunakan presisi penuh dari formula Excel.
+  Basis perhitungan: <b>Rev08-FINAL-Kalkulator Tarif Trucking Biomassa ALL PLTU R1.xlsx</b>. Metode ring: R1 basis 50 km/aktual, R2 basis 100 km, R3 basis 300 km. Kalkulasi dilakukan lokal pada perangkat pengguna; angka tampilan dibulatkan, sedangkan mesin perhitungan menggunakan presisi penuh dari formula Excel.
 </div>
 
 <script>
@@ -205,6 +225,7 @@ const SURVEY_MAP = Object.fromEntries(SURVEY.map(x => [String(x.name).trim(), x.
 let overrides = {};
 let cache = new Map();
 let crossing = "TIDAK";
+let ring1Method = "ANCHOR";
 
 function n(v){
   if(v === null || v === undefined || v === "") return 0;
@@ -310,16 +331,39 @@ const detailSpec = [
   ["Administrasi & operasional kantor","Rekapitulasi","D25"]
 ];
 
+function ringState(){
+  const ring=document.getElementById("ring").value;
+  const actual=Number(document.getElementById("actualDistance").value);
+  let basis;
+  let methodLabel;
+  if(ring==="R1"){
+    basis=ring1Method==="DIRECT" ? actual : 50;
+    methodLabel=ring1Method==="DIRECT" ? "hitung langsung jarak aktual" : "basis 50 km × jarak aktual";
+  }else if(ring==="R2"){
+    basis=100;
+    methodLabel="basis 100 km × jarak aktual";
+  }else{
+    basis=300;
+    methodLabel="basis 300 km × jarak aktual";
+  }
+  return {ring,actual,basis,methodLabel};
+}
+
 function recalc(){
   const pltu=document.getElementById("pltu").value;
-  const distance=Number(document.getElementById("distance").value);
+  const rs=ringState();
+  const actualDistance=rs.actual;
+  const basisDistance=rs.basis;
   const capacity=Number(document.getElementById("capacity").value);
   const fuelPrice=Number(document.getElementById("fuelPriceInput").value);
   const err=document.getElementById("errorBox");
 
   const errors=[];
   if(!pltu) errors.push("PLTU belum dipilih.");
-  if(!Number.isFinite(distance) || distance<=0) errors.push("Jarak harus lebih besar dari 0 km.");
+  if(!Number.isFinite(actualDistance) || actualDistance<=0) errors.push("Jarak aktual harus lebih besar dari 0 km.");
+  if(rs.ring==="R1" && Number.isFinite(actualDistance) && actualDistance>=50) errors.push("Ring 1 hanya untuk jarak aktual di bawah 50 km.");
+  if(rs.ring==="R2" && Number.isFinite(actualDistance) && (actualDistance<50 || actualDistance>100)) errors.push("Ring 2 digunakan untuk jarak aktual 50–100 km.");
+  if(rs.ring==="R3" && Number.isFinite(actualDistance) && (actualDistance<=100 || actualDistance>300)) errors.push("Ring 3 digunakan untuk jarak aktual di atas 100 km sampai 300 km.");
   if(!Number.isFinite(capacity) || capacity<5 || capacity>30) errors.push("Kapasitas truk harus berada pada rentang 5–30 ton.");
   if(!Number.isFinite(fuelPrice) || fuelPrice<=0) errors.push("Harga BBM harus lebih besar dari Rp0/liter.");
 
@@ -330,7 +374,7 @@ function recalc(){
   err.style.display="none";
   overrides={
     "KALKULATOR BIAYA TRUK!F8":pltu,
-    "KALKULATOR BIAYA TRUK!F9":distance,
+    "KALKULATOR BIAYA TRUK!F9":basisDistance,
     "KALKULATOR BIAYA TRUK!F10":capacity,
     "KALKULATOR BIAYA TRUK!F11":crossing,
     "Asumsi!C9":fuelPrice
@@ -338,7 +382,9 @@ function recalc(){
   cache=new Map();
 
   const finalTK=get("KALKULATOR BIAYA TRUK","J15");
-  const finalTon=get("KALKULATOR BIAYA TRUK","J16");
+  // Harga per ton selalu memakai tarif Rp/Ton.Km pada basis ring × jarak aktual.
+  // Pada Ring 1 metode langsung, basisDistance = actualDistance sehingga hasil identik dengan kalkulasi langsung Excel.
+  const finalTon=finalTK*actualDistance;
   const base=get("Rekapitulasi","D27");
   const margin=get("Perhitungan BOK - PERMENHUB","F455");
 
@@ -358,10 +404,34 @@ function recalc(){
   document.getElementById("freq").textContent=fmt2.format(get("Asumsi","K9"))+" rit";
   document.getElementById("tonKmYear").textContent=fmt0.format(get("Asumsi","K15"))+" ton-km";
   document.getElementById("crossingCost").textContent=rup(get("Asumsi","C69"),0);
-  document.getElementById("resultContext").textContent=`${pltu} • ${fmt2.format(distance)} km • ${fmt2.format(capacity)} ton • BBM ${rup(fuelPrice,0)}/liter • Penyeberangan: ${crossing==="YA"?"Ya":"Tidak"}`;
+  const ringName=rs.ring==="R1"?"Ring 1":rs.ring==="R2"?"Ring 2":"Ring 3";
+  document.getElementById("resultContext").textContent=`${pltu} • ${ringName} • aktual ${fmt2.format(actualDistance)} km • basis BOK ${fmt2.format(basisDistance)} km • ${fmt2.format(capacity)} ton • BBM ${rup(fuelPrice,0)}/liter`;
 
   const box=document.getElementById("detailRows");
   box.innerHTML=detailSpec.map(([label,s,c])=>`<div class="row sub"><span>${label}</span><span class="val">${rup(get(s,c),2)} /Ton.Km</span></div>`).join("");
+}
+
+function setRing1Method(value){
+  ring1Method=value;
+  document.getElementById("ring1Anchor").classList.toggle("active",value==="ANCHOR");
+  document.getElementById("ring1Direct").classList.toggle("active",value==="DIRECT");
+  document.getElementById("ringMethodNote").textContent=value==="ANCHOR"
+    ? "Acuan 50 km: tarif Rp/Ton.Km dihitung pada 50 km, kemudian dikalikan jarak aktual."
+    : "Hitung aktual: jarak aktual langsung dimasukkan ke model Excel untuk menentukan tarif Rp/Ton.Km.";
+  recalc();
+}
+
+function syncRingUI(setDefault=false){
+  const ring=document.getElementById("ring").value;
+  const methodField=document.getElementById("ring1MethodField");
+  methodField.classList.toggle("hidden",ring!=="R1");
+  const d=document.getElementById("actualDistance");
+  if(setDefault){
+    if(ring==="R1") d.value=40;
+    else if(ring==="R2") d.value=90;
+    else d.value=200;
+  }
+  recalc();
 }
 
 function setCross(value){
@@ -390,21 +460,27 @@ function syncFuelFromPltu(){
   }
   sel.value="TANJUNG JATI";
   sel.addEventListener("change",syncFuelFromPltu);
-  document.getElementById("distance").addEventListener("input",recalc);
+  document.getElementById("ring").addEventListener("change",()=>syncRingUI(true));
+  document.getElementById("actualDistance").addEventListener("input",recalc);
+  document.getElementById("ring1Anchor").addEventListener("click",()=>setRing1Method("ANCHOR"));
+  document.getElementById("ring1Direct").addEventListener("click",()=>setRing1Method("DIRECT"));
   document.getElementById("capacity").addEventListener("input",recalc);
   document.getElementById("fuelPriceInput").addEventListener("input",recalc);
   document.getElementById("crossNo").addEventListener("click",()=>setCross("TIDAK"));
   document.getElementById("crossYes").addEventListener("click",()=>setCross("YA"));
   document.getElementById("resetBtn").addEventListener("click",()=>{
-    sel.value="TANJUNG JATI"; document.getElementById("distance").value=100; document.getElementById("capacity").value=17; crossing="TIDAK";
+    sel.value="TANJUNG JATI"; document.getElementById("ring").value="R2"; document.getElementById("actualDistance").value=90; document.getElementById("capacity").value=17; crossing="TIDAK"; ring1Method="ANCHOR";
     document.getElementById("crossNo").classList.add("active"); document.getElementById("crossYes").classList.remove("active"); syncFuelFromPltu();
   });
   document.getElementById("copyBtn").addEventListener("click",async()=>{
     recalc();
-    const text=`Kalkulator Biaya Angkutan Biomassa\nPLTU: ${sel.value}\nJarak: ${document.getElementById("distance").value} km\nKapasitas: ${document.getElementById("capacity").value} ton\nHarga BBM: Rp ${fmt0.format(Number(document.getElementById("fuelPriceInput").value))}/liter\nPenyeberangan: ${crossing}\nBiaya/Ton.Km: ${document.getElementById("perTonKm").textContent}\nBiaya/Ton: ${document.getElementById("perTon").textContent}\n*sebelum pajak`;
+    const rs=ringState();
+    const ringName=rs.ring==="R1"?"Ring 1":rs.ring==="R2"?"Ring 2":"Ring 3";
+    const text=`Kalkulator Biaya Angkutan Biomassa\nPLTU: ${sel.value}\nRing: ${ringName}\nJarak aktual: ${document.getElementById("actualDistance").value} km\nJarak basis BOK: ${rs.basis} km\nMetode: ${rs.methodLabel}\nKapasitas: ${document.getElementById("capacity").value} ton\nHarga BBM: Rp ${fmt0.format(Number(document.getElementById("fuelPriceInput").value))}/liter\nPenyeberangan: ${crossing}\nBiaya/Ton.Km (basis ring): ${document.getElementById("perTonKm").textContent}\nBiaya/Ton: ${document.getElementById("perTon").textContent}\n*sebelum pajak`;
     try{ await navigator.clipboard.writeText(text); this && null; document.getElementById("copyBtn").textContent="Tersalin"; setTimeout(()=>document.getElementById("copyBtn").textContent="Salin hasil",1200); }
     catch(e){ alert(text); }
   });
+  syncRingUI(false);
   syncFuelFromPltu();
 })();
 </script>
