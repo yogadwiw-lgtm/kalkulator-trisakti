@@ -345,19 +345,17 @@ body.auth-locked > .footer{display:none!important;}
           <div class="field">
             <label for="loadFactorInput">Load Factor</label>
             <div class="unit"><input id="loadFactorInput" type="number" min="1" max="100" step="1" value="50"><span>%</span></div>
-            <div style="margin-top:6px;color:var(--muted);font-size:11px;line-height:1.4">Default Excel: 50% (Asumsi!C5).</div>
           </div>
           <div class="field">
             <label for="profitInput">Profit / Margin</label>
             <div class="unit"><input id="profitInput" type="number" min="0" max="100" step="0.5" value="10"><span>%</span></div>
-            <div style="margin-top:6px;color:var(--muted);font-size:11px;line-height:1.4">Default Excel: 10% (Asumsi!C6).</div>
           </div>
         </div>
 
         <div class="field">
           <label for="fuelPriceInput">Harga BBM</label>
           <div class="unit"><input id="fuelPriceInput" type="number" min="1" step="50" value="6800"><span>Rp/ltr</span></div>
-          <div id="fuelRefNote" style="margin-top:6px;color:var(--muted);font-size:11px;line-height:1.4">Nilai awal mengikuti Rekap Interview Driver kolom J dan dapat diubah manual.</div>
+          <div id="fuelRefNote" class="hidden"></div>
         </div>
 
         <div class="field">
@@ -761,9 +759,9 @@ function syncFuelFromPltu(){
     field.value=pltu;
     input.value=reference;
   }
-  document.getElementById("fuelRefNote").textContent=reference>0
-    ? `Referensi ${pltu}: ${rup(reference,0)}/liter (Rekap Interview Driver kolom J). Dapat diubah manual.`
-    : "Ketik/pilih nama PLTU yang tersedia untuk mengambil referensi harga BBM otomatis.";
+  const fuelNote=document.getElementById("fuelRefNote");
+  fuelNote.textContent="";
+  fuelNote.classList.add("hidden");
   recalc();
 }
 
@@ -817,7 +815,7 @@ function syncFuelFromPltu(){
 <script>
 (function(){
   const AUTH_KEY="plnepi_biomassa_auth";
-  const USER_HASHES={"aidah.nadhifah":"d6448fc544bc850bd18fa093b5f6e60e1013a2908db5c2077eb0ccf1e33ea963", "yoga.dwi":"113da4cda83a9aed98bbf5b2d06b49e8bc3f847a822cfeb0b1294869857e6146"};
+  const USER_HASHES={"aidah.nadhifah":"d6448fc544bc850bd18fa093b5f6e60e1013a2908db5c2077eb0ccf1e33ea963", "yoga.dwi":"113da4cda83a9aed98bbf5b2d06b49e8bc3f847a822cfeb0b1294869857e6146", "laksdan":"eb1f3f08bc9b950f27b1012cae20ce36c56593dc9287dda5ed205e8317d75549", "dalkon":"4cf853c1f5ccc1f7f939db79a748e2e6a9659a645b3858f54c28fd32a5a697a8"};
 
   function rrot(n,b){ return (n>>>b)|(n<<(32-b)); }
   function sha256(ascii){
