@@ -385,7 +385,7 @@ body.auth-locked > .footer{display:none!important;}
 
 <div class="calc-nav-wrap">
   <div class="calc-nav" role="tablist" aria-label="Pilihan Kalkulator">
-    <button id="navTrucking" class="active" type="button" data-page="truckingPage">Kalkulator Trucking</button>
+    <button id="navTrucking" class="active" type="button" data-page="truckingPage">Kalkulator Trisakti</button>
     <button id="navNP" type="button" data-page="npPage">Kalkulator NP</button>
   </div>
 </div>
@@ -404,7 +404,7 @@ body.auth-locked > .footer{display:none!important;}
 
         <div class="field">
           <label for="pltu">PLTU tujuan</label>
-          <input id="pltu" list="pltuList" type="text" value="TANJUNG JATI" placeholder="Ketik atau pilih nama PLTU" autocomplete="off">
+          <input id="pltu" list="pltuList" type="text" placeholder="Ketik atau pilih nama PLTU" autocomplete="off">
           <datalist id="pltuList"></datalist>
           <div class="method-hint">Ketik nama PLTU untuk mencari, lalu pilih dari saran yang muncul.</div>
         </div>
@@ -413,15 +413,16 @@ body.auth-locked > .footer{display:none!important;}
           <div class="field">
             <label for="ring">Ring jarak</label>
             <select id="ring">
+              <option value="" selected disabled>Pilih ring</option>
               <option value="R1">Ring 1 – &lt; 50 km</option>
-              <option value="R2" selected>Ring 2 – s.d. 100 km</option>
+              <option value="R2">Ring 2 – s.d. 100 km</option>
               <option value="R3">Ring 3 – s.d. 300 km</option>
               <option value="R4">Di atas Ring 3 – &gt; 300 km</option>
             </select>
           </div>
           <div class="field">
             <label for="actualDistance">Jarak aktual</label>
-            <div class="unit"><input id="actualDistance" type="number" min="0.1" step="0.1" value="90"><span>km</span></div>
+            <div class="unit"><input id="actualDistance" type="number" min="0.1" step="0.1"><span>km</span></div>
           </div>
         </div>
 
@@ -436,42 +437,42 @@ body.auth-locked > .footer{display:none!important;}
 
         <div class="field">
           <label for="capacity">Kapasitas truk</label>
-          <div class="unit"><input id="capacity" type="number" min="5" max="30" step="0.1" value="17"><span>ton</span></div>
+          <div class="unit"><input id="capacity" type="number" min="5" max="30" step="0.1"><span>ton</span></div>
         </div>
 
         <div class="inline">
           <div class="field">
             <label for="loadFactorInput">Load Factor</label>
-            <div class="unit"><input id="loadFactorInput" type="number" min="1" max="100" step="1" value="50"><span>%</span></div>
+            <div class="unit"><input id="loadFactorInput" type="number" min="1" max="100" step="1"><span>%</span></div>
           </div>
           <div class="field">
             <label for="profitInput">Profit / Margin</label>
-            <div class="unit"><input id="profitInput" type="number" min="0" max="100" step="0.5" value="10"><span>%</span></div>
+            <div class="unit"><input id="profitInput" type="number" min="0" max="100" step="0.5"><span>%</span></div>
           </div>
         </div>
 
         <div class="field">
           <label for="fuelPriceInput">Harga BBM</label>
-          <div class="unit"><input id="fuelPriceInput" type="number" min="1" step="50" value="6800"><span>Rp/ltr</span></div>
+          <div class="unit"><input id="fuelPriceInput" type="number" min="1" step="50"><span>Rp/ltr</span></div>
           <div id="fuelRefNote" class="hidden"></div>
         </div>
 
         <div class="field">
           <label for="exchangeRateInput">Kurs Saat Ini</label>
-          <div class="unit"><input id="exchangeRateInput" type="number" min="1" step="1" value="17179"><span>Rp/USD</span></div>
+          <div class="unit"><input id="exchangeRateInput" type="number" min="1" step="1"><span>Rp/USD</span></div>
         </div>
 
         <div class="field">
           <label>Penyeberangan</label>
           <div class="segment">
-            <button type="button" id="crossNo" class="active" data-value="TIDAK">Tidak</button>
+            <button type="button" id="crossNo" data-value="TIDAK">Tidak</button>
             <button type="button" id="crossYes" data-value="YA">Ya</button>
           </div>
         </div>
 
         <div class="field hidden" id="crossingCostField">
           <label for="crossingCostInput">Biaya Penyeberangan</label>
-          <div class="unit"><input id="crossingCostInput" type="number" min="0" step="1000" value="2570400"><span>Rp/rit</span></div>
+          <div class="unit"><input id="crossingCostInput" type="number" min="0" step="1000"><span>Rp/rit</span></div>
           <div id="crossingCostNote" style="margin-top:6px;color:var(--muted);font-size:11px;line-height:1.4">Nilai awal mengikuti tarif penyeberangan pada model Excel berdasarkan kapasitas truk dan dapat diubah manual.</div>
         </div>
 
@@ -493,11 +494,11 @@ body.auth-locked > .footer{display:none!important;}
       <div class="bd">
         <div class="result-hero">
           <div class="kicker">Biaya angkutan</div>
-          <div class="big" id="perTon">Rp 0</div>
+          <div class="big" id="perTon">—</div>
           <div class="unitline">per ton • sebelum pajak</div>
           <div class="secondary">
-            <div><span>Tarif per Ton.Km</span><br><b id="perTonKm">Rp 0</b></div>
-            <div><span>BOK dasar per Ton.Km</span><br><b id="baseBok">Rp 0</b></div>
+            <div><span>Tarif per Ton.Km</span><br><b id="perTonKm">—</b></div>
+            <div><span>BOK dasar per Ton.Km</span><br><b id="baseBok">—</b></div>
           </div>
         </div>
 
@@ -512,7 +513,7 @@ body.auth-locked > .footer{display:none!important;}
           <div class="row total"><span>Biaya langsung</span><span class="val" id="direct">—</span></div>
           <div class="row total"><span>Biaya tidak langsung</span><span class="val" id="indirect">—</span></div>
           <div class="row total"><span>Total BOK dasar</span><span class="val" id="base">—</span></div>
-          <div class="row"><span id="marginLabel">Profit / margin (10%)</span><span class="val" id="margin">—</span></div>
+          <div class="row"><span id="marginLabel">Profit / margin</span><span class="val" id="margin">—</span></div>
           <div class="row final"><span>Tarif akhir per Ton.Km</span><span class="val" id="finalTonKm">—</span></div>
         </div>
 
@@ -550,6 +551,7 @@ body.auth-locked > .footer{display:none!important;}
           <div class="field">
             <label for="npMode">Jenis Perhitungan</label>
             <select id="npMode">
+              <option value="" selected disabled>Pilih Normal / Premium</option>
               <option value="normal">Normal</option>
               <option value="premium">Premium</option>
             </select>
@@ -558,7 +560,7 @@ body.auth-locked > .footer{display:none!important;}
           <div class="field">
             <label for="npCapacity">Kapasitas Truk Aktual</label>
             <div class="unit">
-              <input id="npCapacity" type="number" min="0.01" max="30" step="0.01" value="5">
+              <input id="npCapacity" type="number" min="0.01" max="30" step="0.01">
               <span>ton</span>
             </div>
           </div>
@@ -568,7 +570,7 @@ body.auth-locked > .footer{display:none!important;}
           <div id="npDensityField" class="field np-density-row np-input-yellow">
             <label for="npDensity">Densitas</label>
             <div class="unit">
-              <input id="npDensity" type="number" min="0.01" step="0.01" value="0.70">
+              <input id="npDensity" type="number" min="0.01" step="0.01">
               <span>ton/m³</span>
             </div>
           </div>
@@ -576,7 +578,7 @@ body.auth-locked > .footer{display:none!important;}
           <div class="field np-input-yellow">
             <label for="npDistance">Jarak</label>
             <div class="unit">
-              <input id="npDistance" type="number" min="0" step="0.1" value="8">
+              <input id="npDistance" type="number" min="0" step="0.1">
               <span>km</span>
             </div>
           </div>
@@ -585,14 +587,14 @@ body.auth-locked > .footer{display:none!important;}
             <div class="field np-input-yellow">
               <label for="npLoadTime">Waktu Muat</label>
               <div class="unit">
-                <input id="npLoadTime" type="number" min="0" step="0.1" value="2">
+                <input id="npLoadTime" type="number" min="0" step="0.1">
                 <span>jam</span>
               </div>
             </div>
             <div class="field np-input-yellow">
               <label for="npUnloadTime">Waktu Bongkar</label>
               <div class="unit">
-                <input id="npUnloadTime" type="number" min="0" step="0.1" value="2">
+                <input id="npUnloadTime" type="number" min="0" step="0.1">
                 <span>jam</span>
               </div>
             </div>
@@ -670,12 +672,12 @@ body.auth-locked > .footer{display:none!important;}
             <summary>Detail parameter perhitungan</summary>
             <div class="model-meta">
               <div class="meta"><span>Sewa Harian Truk</span><b id="npDailyRent">—</b></div>
-              <div class="meta"><span>BBM</span><b>Rp6.800/liter</b></div>
-              <div class="meta"><span>Kecepatan Penuh</span><b>40 km/jam</b></div>
-              <div class="meta"><span>Kecepatan Kosong</span><b>45 km/jam</b></div>
-              <div class="meta"><span>Slack Time</span><b>3 jam</b></div>
-              <div class="meta"><span>Konsumsi Penuh</span><b>0,334 liter/km</b></div>
-              <div class="meta"><span>Konsumsi Kosong</span><b>0,2 liter/km</b></div>
+              <div class="meta"><span>BBM</span><b id="npFuelPriceFixed">—</b></div>
+              <div class="meta"><span>Kecepatan Penuh</span><b id="npFullSpeedFixed">—</b></div>
+              <div class="meta"><span>Kecepatan Kosong</span><b id="npEmptySpeedFixed">—</b></div>
+              <div class="meta"><span>Slack Time</span><b id="npSlackFixed">—</b></div>
+              <div class="meta"><span>Konsumsi Penuh</span><b id="npFuelFullFixed">—</b></div>
+              <div class="meta"><span>Konsumsi Kosong</span><b id="npFuelEmptyFixed">—</b></div>
               <div class="meta"><span>Basis Uang Jalan</span><b id="npRoadBasis">—</b></div>
             </div>
           </details>
@@ -702,7 +704,7 @@ const SURVEY = MODEL.survey;
 const SURVEY_MAP = Object.fromEntries(SURVEY.map(x => [String(x.name).trim(), x.row]));
 let overrides = {};
 let cache = new Map();
-let crossing = "TIDAK";
+let crossing = "";
 let crossingCostManual = false;
 let ring1Method = "ANCHOR";
 
@@ -880,9 +882,12 @@ function ringState(){
   }else if(ring==="R3"){
     basis=300;
     methodLabel="basis 300 km × jarak aktual";
-  }else{
+  }else if(ring==="R4"){
     basis=300;
     methodLabel="di atas Ring 3: tarif basis 300 km × jarak aktual";
+  }else{
+    basis=NaN;
+    methodLabel="";
   }
   return {ring,actual,basis,methodLabel};
 }
@@ -892,6 +897,24 @@ function resolvePltuName(value){
   if(!typed) return "";
   const exact=SURVEY.find(x=>x.name.toLowerCase()===typed.toLowerCase());
   return exact ? exact.name : "";
+}
+
+function clearTrisaktiResults(){
+  const ids=[
+    "perTon","perTonKm","baseBok","speed","fuelUse","fuelPrice",
+    "direct","indirect","base","margin","finalTonKm",
+    "roundTrip","freq","tonKmYear","exchangeRateResult","crossingCost"
+  ];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent="—";
+  });
+  const ctx=document.getElementById("resultContext");
+  if(ctx) ctx.textContent="—";
+  const marginLabel=document.getElementById("marginLabel");
+  if(marginLabel) marginLabel.textContent="Profit / margin";
+  const details=document.getElementById("detailRows");
+  if(details) details.innerHTML="";
 }
 
 function recalc(){
@@ -913,6 +936,7 @@ function recalc(){
   const errors=[];
   if(!String(pltuTyped).trim()) errors.push("PLTU belum dipilih atau diketik.");
   else if(!pltu) errors.push("Nama PLTU tidak ditemukan pada daftar referensi. Pilih nama PLTU dari saran yang tersedia.");
+  if(!rs.ring) errors.push("Ring jarak belum dipilih.");
   if(!Number.isFinite(actualDistance) || actualDistance<=0) errors.push("Jarak aktual harus lebih besar dari 0 km.");
   if(rs.ring==="R1" && Number.isFinite(actualDistance) && actualDistance>=50) errors.push("Ring 1 hanya untuk jarak aktual di bawah 50 km.");
   if(rs.ring==="R2" && Number.isFinite(actualDistance) && (actualDistance<50 || actualDistance>100)) errors.push("Ring 2 digunakan untuk jarak aktual 50–100 km.");
@@ -923,9 +947,11 @@ function recalc(){
   if(!Number.isFinite(profitPct) || profitPct<0 || profitPct>100) errors.push("Profit/Margin harus berada pada rentang 0–100%.");
   if(!Number.isFinite(fuelPrice) || fuelPrice<=0) errors.push("Harga BBM harus lebih besar dari Rp0/liter.");
   if(!Number.isFinite(exchangeRate) || exchangeRate<=0) errors.push("Kurs harus lebih besar dari Rp0/USD.");
+  if(crossing!=="YA" && crossing!=="TIDAK") errors.push("Pilih status penyeberangan Ya atau Tidak.");
   if(crossing==="YA" && (!Number.isFinite(crossingCost) || crossingCost<0)) errors.push("Biaya penyeberangan harus berupa angka Rp/rit yang valid.");
 
   if(errors.length){
+    clearTrisaktiResults();
     err.innerHTML=errors.join("<br>"); err.style.display="block";
     return;
   }
@@ -1034,13 +1060,12 @@ function syncFuelFromPltu(){
   for(const x of SURVEY){
     const o=document.createElement("option"); o.value=x.name; list.appendChild(o);
   }
-  sel.value="TANJUNG JATI";
   sel.addEventListener("change",syncFuelFromPltu);
   sel.addEventListener("input",()=>{
     if(resolvePltuName(sel.value)) syncFuelFromPltu();
     else recalc();
   });
-  document.getElementById("ring").addEventListener("change",()=>syncRingUI(true));
+  document.getElementById("ring").addEventListener("change",()=>syncRingUI(false));
   document.getElementById("actualDistance").addEventListener("input",recalc);
   document.getElementById("ring1Anchor").addEventListener("click",()=>setRing1Method("ANCHOR"));
   document.getElementById("ring1Direct").addEventListener("click",()=>setRing1Method("DIRECT"));
@@ -1059,8 +1084,24 @@ function syncFuelFromPltu(){
   document.getElementById("crossNo").addEventListener("click",()=>setCross("TIDAK"));
   document.getElementById("crossYes").addEventListener("click",()=>setCross("YA"));
   document.getElementById("resetBtn").addEventListener("click",()=>{
-    sel.value="TANJUNG JATI"; document.getElementById("ring").value="R2"; document.getElementById("actualDistance").value=90; document.getElementById("capacity").value=17; document.getElementById("loadFactorInput").value=50; document.getElementById("profitInput").value=10; document.getElementById("exchangeRateInput").value=17179; crossing="TIDAK"; crossingCostManual=false; ring1Method="ANCHOR";
-    document.getElementById("crossNo").classList.add("active"); document.getElementById("crossYes").classList.remove("active"); document.getElementById("crossingCostField").classList.add("hidden"); syncCrossingCostDefault(true); syncFuelFromPltu();
+    sel.value="";
+    document.getElementById("ring").value="";
+    document.getElementById("actualDistance").value="";
+    document.getElementById("capacity").value="";
+    document.getElementById("loadFactorInput").value="";
+    document.getElementById("profitInput").value="";
+    document.getElementById("fuelPriceInput").value="";
+    document.getElementById("exchangeRateInput").value="";
+    document.getElementById("crossingCostInput").value="";
+    crossing="";
+    crossingCostManual=false;
+    ring1Method="ANCHOR";
+    document.getElementById("crossNo").classList.remove("active");
+    document.getElementById("crossYes").classList.remove("active");
+    document.getElementById("crossingCostField").classList.add("hidden");
+    document.getElementById("ring1MethodField").classList.add("hidden");
+    document.getElementById("errorBox").style.display="none";
+    clearTrisaktiResults();
   });
   document.getElementById("copyBtn").addEventListener("click",async()=>{
     recalc();
@@ -1070,9 +1111,12 @@ function syncFuelFromPltu(){
     try{ await navigator.clipboard.writeText(text); this && null; document.getElementById("copyBtn").textContent="Tersalin"; setTimeout(()=>document.getElementById("copyBtn").textContent="Salin hasil",1200); }
     catch(e){ alert(text); }
   });
-  syncRingUI(false);
-  syncCrossingCostDefault(true);
-  syncFuelFromPltu();
+  document.getElementById("crossNo").classList.remove("active");
+  document.getElementById("crossYes").classList.remove("active");
+  document.getElementById("crossingCostField").classList.add("hidden");
+  document.getElementById("ring1MethodField").classList.add("hidden");
+  document.getElementById("errorBox").style.display="none";
+  clearTrisaktiResults();
 })();
 </script>
 
@@ -1184,21 +1228,23 @@ function syncFuelFromPltu(){
     const mode=document.getElementById("npMode").value;
     const capacity=npNum("npCapacity");
     const bucket=npBucket(capacity);
-    if(!bucket) return;
+    const densityField=document.getElementById("npDensityField");
+
+    if(mode==="premium") densityField.classList.add("show");
+    else densityField.classList.remove("show");
+
+    if(!mode || !bucket){
+      npRecalc();
+      return;
+    }
 
     const config=NP_CONFIG[mode][bucket];
     npApplyingDefaults=true;
     document.getElementById("npDistance").value=config.distance;
     document.getElementById("npLoadTime").value=config.load;
     document.getElementById("npUnloadTime").value=config.unload;
-
-    const densityField=document.getElementById("npDensityField");
-    if(mode==="premium"){
-      densityField.classList.add("show");
-      document.getElementById("npDensity").value=config.density;
-    }else{
-      densityField.classList.remove("show");
-    }
+    if(mode==="premium") document.getElementById("npDensity").value=config.density;
+    else document.getElementById("npDensity").value="";
     npApplyingDefaults=false;
     npRecalc();
   }
@@ -1213,6 +1259,7 @@ function syncFuelFromPltu(){
     const density=mode==="premium" ? npNum("npDensity") : 1;
 
     const errors=[];
+    if(!mode) errors.push("Pilih jenis perhitungan Normal atau Premium.");
     if(!bucket) errors.push("Kapasitas truk harus lebih besar dari 0 dan maksimal 30 ton.");
     if(!Number.isFinite(distance) || distance<0) errors.push("Jarak harus bernilai 0 atau lebih.");
     if(!Number.isFinite(load) || load<0) errors.push("Waktu muat harus bernilai 0 atau lebih.");
@@ -1224,7 +1271,9 @@ function syncFuelFromPltu(){
     if(!bucket || errors.length){
       ["npTotalPerTon","npBucketResult","npEffectiveCapacity","npRoundtrip",
        "npDistanceResult","npModeResult","npRentPerTon","npFuelPerTon",
-       "npRoadPerTon","npTotalBreakdown","npDailyRent","npRoadBasis"
+       "npRoadPerTon","npTotalBreakdown","npDailyRent","npRoadBasis",
+       "npFuelPriceFixed","npFullSpeedFixed","npEmptySpeedFixed","npSlackFixed",
+       "npFuelFullFixed","npFuelEmptyFixed"
       ].forEach(id=>{
         const el=document.getElementById(id);
         if(el) el.textContent="—";
@@ -1275,6 +1324,12 @@ function syncFuelFromPltu(){
     document.getElementById("npDailyRent").textContent=npRupiah(dailyRent,0)+"/hari";
     document.getElementById("npRoadBasis").textContent=
       npRupiah(NP_CONFIG.roadBase[bucket],0)+" × (roundtrip/"+roadDivisor+")";
+    document.getElementById("npFuelPriceFixed").textContent=npRupiah(NP_FIXED.fuelPrice,0)+"/liter";
+    document.getElementById("npFullSpeedFixed").textContent=npFmt(NP_FIXED.fullSpeed,0)+" km/jam";
+    document.getElementById("npEmptySpeedFixed").textContent=npFmt(NP_FIXED.emptySpeed,0)+" km/jam";
+    document.getElementById("npSlackFixed").textContent=npFmt(NP_FIXED.slack,0)+" jam";
+    document.getElementById("npFuelFullFixed").textContent=npFmt(NP_FIXED.fuelFull,3)+" liter/km";
+    document.getElementById("npFuelEmptyFixed").textContent=npFmt(NP_FIXED.fuelEmpty,1)+" liter/km";
     document.getElementById("npResultContext").textContent=
       `${mode==="premium"?"Premium":"Normal"} • kapasitas aktual ${npFmt(actualCapacity,2)} ton • kelas ${bucket} ton`+
       (mode==="premium"?` • densitas ${npFmt(density,2)}`:"");
@@ -1308,9 +1363,25 @@ function syncFuelFromPltu(){
   }
 
   function npReset(){
-    document.getElementById("npMode").value="normal";
-    document.getElementById("npCapacity").value=5;
-    npApplyDefaults();
+    document.getElementById("npMode").value="";
+    document.getElementById("npCapacity").value="";
+    document.getElementById("npDensity").value="";
+    document.getElementById("npDistance").value="";
+    document.getElementById("npLoadTime").value="";
+    document.getElementById("npUnloadTime").value="";
+    document.getElementById("npDensityField").classList.remove("show");
+    document.getElementById("npClassInfo").innerHTML="";
+    document.getElementById("npResultContext").textContent="—";
+    npShowError([]);
+    ["npTotalPerTon","npBucketResult","npEffectiveCapacity","npRoundtrip",
+     "npDistanceResult","npModeResult","npRentPerTon","npFuelPerTon",
+     "npRoadPerTon","npTotalBreakdown","npDailyRent","npRoadBasis",
+     "npFuelPriceFixed","npFullSpeedFixed","npEmptySpeedFixed","npSlackFixed",
+     "npFuelFullFixed","npFuelEmptyFixed"
+    ].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.textContent="—";
+    });
   }
 
   window.addEventListener("DOMContentLoaded",()=>{
@@ -1329,7 +1400,7 @@ function syncFuelFromPltu(){
     document.getElementById("npCopyBtn")?.addEventListener("click",npCopy);
     document.getElementById("npResetBtn")?.addEventListener("click",npReset);
 
-    npApplyDefaults();
+    npReset();
   });
 })();
 </script>
