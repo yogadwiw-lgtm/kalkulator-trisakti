@@ -560,12 +560,12 @@ body.auth-locked > .footer{display:none!important;}
           <div class="field">
             <label for="npCapacity">Kapasitas Truk Aktual</label>
             <div class="unit">
-              <input id="npCapacity" type="number" min="0.01" max="30" step="0.01">
+              <input id="npCapacity" autocomplete="off" type="number" min="0.01" max="30" step="0.01">
               <span>ton</span>
             </div>
           </div>
           <div id="npDistanceCapacityRule" class="np-class-box" style="display:none">
-            Untuk jarak di atas 300 km, kapasitas truk minimal <b>10 ton</b>.
+            Khusus jika jarak yang diinput <b>di atas 300 km</b>, kapasitas truk minimal <b>10 ton</b>. Nilai kapasitas tidak diubah otomatis; jika kurang dari 10 ton, hasil tidak dihitung.
           </div>
 
           <div id="npClassInfo" class="np-class-box"></div>
@@ -573,7 +573,7 @@ body.auth-locked > .footer{display:none!important;}
           <div id="npDensityField" class="field np-density-row np-input-yellow">
             <label for="npDensity">Densitas</label>
             <div class="unit">
-              <input id="npDensity" type="number" min="0.01" step="0.01">
+              <input id="npDensity" autocomplete="off" type="number" min="0.01" step="0.01">
               <span>ton/m³</span>
             </div>
           </div>
@@ -581,7 +581,7 @@ body.auth-locked > .footer{display:none!important;}
           <div class="field np-input-yellow">
             <label for="npDistance">Jarak</label>
             <div class="unit">
-              <input id="npDistance" type="number" min="0" step="0.1">
+              <input id="npDistance" autocomplete="off" type="number" min="0" step="0.1">
               <span>km</span>
             </div>
           </div>
@@ -590,14 +590,14 @@ body.auth-locked > .footer{display:none!important;}
             <div class="field np-input-yellow">
               <label for="npLoadTime">Waktu Muat</label>
               <div class="unit">
-                <input id="npLoadTime" type="number" min="0" step="0.1">
+                <input id="npLoadTime" autocomplete="off" type="number" min="0" step="0.1">
                 <span>jam</span>
               </div>
             </div>
             <div class="field np-input-yellow">
               <label for="npUnloadTime">Waktu Bongkar</label>
               <div class="unit">
-                <input id="npUnloadTime" type="number" min="0" step="0.1">
+                <input id="npUnloadTime" autocomplete="off" type="number" min="0" step="0.1">
                 <span>jam</span>
               </div>
             </div>
@@ -1148,22 +1148,6 @@ function syncFuelFromPltu(){
       20:350000,
       25:350000,
       30:350000
-    },
-    normal: {
-      5:{distance:8, load:2, unload:2},
-      10:{distance:330, load:1, unload:1},
-      15:{distance:300, load:1, unload:1},
-      20:{distance:300, load:1, unload:1},
-      25:{distance:330, load:1, unload:1},
-      30:{distance:150, load:1, unload:1}
-    },
-    premium: {
-      5:{distance:50, load:2, unload:1, density:0.70},
-      10:{distance:145, load:1, unload:1, density:0.70},
-      15:{distance:142, load:1, unload:1, density:0.70},
-      20:{distance:50, load:2, unload:1, density:0.35},
-      25:{distance:50, load:2, unload:1, density:0.35},
-      30:{distance:50, load:2, unload:1, density:0.35}
     }
   };
 
@@ -1227,42 +1211,29 @@ function syncFuelFromPltu(){
     }
   }
 
-  function npApplyDefaults(){
+  function npSyncModeUI(){
     const mode=document.getElementById("npMode").value;
-    const capacity=npNum("npCapacity");
-    const bucket=npBucket(capacity);
     const densityField=document.getElementById("npDensityField");
 
-    if(mode==="premium") densityField.classList.add("show");
-    else densityField.classList.remove("show");
-
-    if(!mode || !bucket){
-      npRecalc();
-      return;
+    if(mode==="premium"){
+      densityField.classList.add("show");
+    }else{
+      densityField.classList.remove("show");
+      document.getElementById("npDensity").value="";
     }
-
-    const config=NP_CONFIG[mode][bucket];
-    npApplyingDefaults=true;
-    document.getElementById("npDistance").value=config.distance;
-    document.getElementById("npLoadTime").value=config.load;
-    document.getElementById("npUnloadTime").value=config.unload;
-    if(mode==="premium") document.getElementById("npDensity").value=config.density;
-    else document.getElementById("npDensity").value="";
-    npApplyingDefaults=false;
     npRecalc();
   }
 
   function npEnforceCapacityRule(){
-    const distance=Number(document.getElementById("npDistance")?.value);
+    const distanceInput=document.getElementById("npDistance");
     const capInput=document.getElementById("npCapacity");
-    if(!capInput) return;
+    if(!capInput || !distanceInput) return;
+
+    const distanceRaw=String(distanceInput.value || "").trim();
+    const distance=distanceRaw==="" ? NaN : Number(distanceRaw);
 
     if(Number.isFinite(distance) && distance>300){
       capInput.min="10";
-      const current=Number(capInput.value);
-      if(capInput.value!=="" && Number.isFinite(current) && current<10){
-        capInput.value="10";
-      }
     }else{
       capInput.min="0.01";
     }
@@ -1418,8 +1389,7 @@ function syncFuelFromPltu(){
     const mode=document.getElementById("npMode");
     const capacity=document.getElementById("npCapacity");
 
-    mode.addEventListener("change",npApplyDefaults);
-    capacity.addEventListener("change",npApplyDefaults);
+    mode.addEventListener("change",npSyncModeUI);
 
     ["npCapacity","npDensity","npDistance","npLoadTime","npUnloadTime"].forEach(id=>{
       document.getElementById(id)?.addEventListener("input",()=>{
