@@ -564,6 +564,9 @@ body.auth-locked > .footer{display:none!important;}
               <span>ton</span>
             </div>
           </div>
+          <div id="npDistanceCapacityRule" class="np-class-box" style="display:none">
+            Untuk jarak di atas 300 km, kapasitas truk minimal <b>10 ton</b>.
+          </div>
 
           <div id="npClassInfo" class="np-class-box"></div>
 
@@ -1249,7 +1252,24 @@ function syncFuelFromPltu(){
     npRecalc();
   }
 
+  function npEnforceCapacityRule(){
+    const distance=Number(document.getElementById("npDistance")?.value);
+    const capInput=document.getElementById("npCapacity");
+    if(!capInput) return;
+
+    if(Number.isFinite(distance) && distance>300){
+      capInput.min="10";
+      const current=Number(capInput.value);
+      if(capInput.value!=="" && Number.isFinite(current) && current<10){
+        capInput.value="10";
+      }
+    }else{
+      capInput.min="0.01";
+    }
+  }
+
   function npRecalc(){
+    npEnforceCapacityRule();
     const mode=document.getElementById("npMode").value;
     const actualCapacity=npNum("npCapacity");
     const bucket=npBucket(actualCapacity);
@@ -1258,10 +1278,18 @@ function syncFuelFromPltu(){
     const unload=npNum("npUnloadTime");
     const density=mode==="premium" ? npNum("npDensity") : 1;
 
+    const ruleBox=document.getElementById("npDistanceCapacityRule");
+    if(ruleBox){
+      ruleBox.style.display=(Number.isFinite(distance) && distance>300) ? "block" : "none";
+    }
+
     const errors=[];
     if(!mode) errors.push("Pilih jenis perhitungan Normal atau Premium.");
     if(!bucket) errors.push("Kapasitas truk harus lebih besar dari 0 dan maksimal 30 ton.");
     if(!Number.isFinite(distance) || distance<0) errors.push("Jarak harus bernilai 0 atau lebih.");
+    if(Number.isFinite(distance) && distance>300 && Number.isFinite(actualCapacity) && actualCapacity<10){
+      errors.push("Untuk jarak di atas 300 km, kapasitas truk minimal 10 ton.");
+    }
     if(!Number.isFinite(load) || load<0) errors.push("Waktu muat harus bernilai 0 atau lebih.");
     if(!Number.isFinite(unload) || unload<0) errors.push("Waktu bongkar harus bernilai 0 atau lebih.");
     if(mode==="premium" && (!Number.isFinite(density) || density<=0)) errors.push("Densitas harus lebih besar dari 0.");
@@ -1365,11 +1393,13 @@ function syncFuelFromPltu(){
   function npReset(){
     document.getElementById("npMode").value="";
     document.getElementById("npCapacity").value="";
+    document.getElementById("npCapacity").min="0.01";
     document.getElementById("npDensity").value="";
     document.getElementById("npDistance").value="";
     document.getElementById("npLoadTime").value="";
     document.getElementById("npUnloadTime").value="";
     document.getElementById("npDensityField").classList.remove("show");
+    document.getElementById("npDistanceCapacityRule").style.display="none";
     document.getElementById("npClassInfo").innerHTML="";
     document.getElementById("npResultContext").textContent="—";
     npShowError([]);
@@ -1393,6 +1423,7 @@ function syncFuelFromPltu(){
 
     ["npCapacity","npDensity","npDistance","npLoadTime","npUnloadTime"].forEach(id=>{
       document.getElementById(id)?.addEventListener("input",()=>{
+        if(id==="npDistance" || id==="npCapacity") npEnforceCapacityRule();
         if(!npApplyingDefaults) npRecalc();
       });
     });
